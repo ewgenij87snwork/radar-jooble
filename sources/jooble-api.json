@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "location": "Ukraine",
+  "result_on_page": 100,
+  "search_mode": 0,
+  "companysearch": false,
+  "queries": [
+    {
+      "id": "frontend-tech",
+      "location": "Ukraine",
+      "keywords": "angular, react, vue, next.js, typescript, javascript, frontend, front end, web developer, web engineer"
+    },
+    {
+      "id": "fullstack-node",
+      "location": "Ukraine",
+      "keywords": "full stack, fullstack, node.js, nodejs, nestjs, backend typescript"
+    },
+    {
+      "id": "ai-js",
+      "location": "Ukraine",
+      "keywords": "ai engineer, ai developer, llm engineer, agentic ai, ai automation, ai integration"
+    },
+    {
+      "id": "hybrid-web",
+      "location": "Ukraine",
+      "keywords": "hybrid angular, hybrid react, hybrid typescript, hybrid javascript, hybrid frontend, hybrid full stack, hybrid node.js, hybrid nestjs"
+    }
+  ]
+}
