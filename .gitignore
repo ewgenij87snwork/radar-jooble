@@ -1,0 +1,11 @@
+.env.local
+.DS_Store
+__pycache__/
+.pytest_cache/
+*.pyc
+results/
+state/api-seen.jsonl
+state/api-usage.json
+state/api-watermark.json
+state/api-run.lock
+state/api-runs/

@@ -1,0 +1,42 @@
+# RADAR-JOOBLE runtime contract
+
+Работай только из физической папки `radar-jooble`. Сначала проверить `pwd -P`: basename должен быть `radar-jooble`.
+
+Это самостоятельная система. Запрещено читать/использовать state/results соседних RADAR-FAST/OfferStream/radar-папок.
+
+## Default normal path: Jooble REST API
+
+Обычный owner-запуск: двойной клик по `RUN.command`. Для агента/автоматизации эквивалент: `python3 api-runner.py run`.
+
+Normal run пишет **ровно два пользовательских результата** в `results/`: один Markdown + один JSONL. Internal diagnostics/state остаются под `state/` и не являются пользовательским output.
+
+Secret boundary:
+- `.env.local` содержит только локальный `JOOBLE_API_KEY=...`;
+- runtime парсит его как данные, не `source`/shell;
+- mode файла должен быть `0600`;
+- ключ нельзя печатать, логировать, класть в results/state diagnostics/ZIP/git/prompt;
+- endpoint с ключом нельзя включать в errors/diagnostics;
+- API errors не retry автоматически и не запускают browser fallback автоматически;
+- `state/api-usage.json` консервативно считает attempts из lifetime quota.
+
+API normal semantics:
+- четыре широких quota-aware query, `ResultOnPage=100`, page 1;
+- `DONE` означает все configured API requests получили валидный response; если `totalCount > returned`, coverage маркируется `BOUNDED_PAGE1`, а не выдаётся за exhaustive;
+- `updated` используется как freshness signal API и явно не называется publication date;
+- explicit Remote **и Hybrid** допустимы;
+- explicit Office-only отклоняется;
+- неизвестный work mode не теряется: `REVIEW`;
+- unknown/invalid `updated` не теряется: `REVIEW` с freshness caution;
+- main JSONL содержит только MATCH/REVIEW; REJECT хранится только во внутреннем state/diagnostics.
+
+Повторный normal run раньше guard-интервала может вернуть предыдущие два готовых файла без новых API calls. `--force` — только явный override и расходует quota.
+
+## Preserved browser path
+
+Существующий browser crawler сохранён byte-for-byte в `radar.py`, `browser-runner.mjs`, `sources/jooble-adapter.mjs`. Его нельзя переписывать как побочный эффект API-работы. Возврат к нему — только явно через `BROWSER-FALLBACK.md`.
+
+Browser runtime использует только существующий OpenAI browser plugin + Chrome extension surface профиля владельца. Не запускать Chrome через shell, не создавать профиль/окно, не писать альтернативные selectors/collectors.
+
+## Development rule
+
+Classifier/query/output changes сначала проходят offline tests/replay. Live API нужен только для transport/query-semantics evidence; live browser calibration — только для browser/navigation/detail semantics. Не использовать полный browser crawl как default regression loop.

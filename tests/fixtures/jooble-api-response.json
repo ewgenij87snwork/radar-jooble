@@ -1,0 +1,77 @@
+{
+  "totalCount": 6,
+  "jobs": [
+    {
+      "id": 1001,
+      "title": "Middle Backend Developer (Node.js)",
+      "location": "Remote",
+      "snippet": "Node.js, TypeScript, REST APIs. 3+ years experience. Fully remote.",
+      "salary": "",
+      "source": "jooble",
+      "type": "Full-time",
+      "link": "https://ua.jooble.org/jdp/111111",
+      "company": "Example One",
+      "updated": "2099-09-21T08:00:00.1234567Z"
+    },
+    {
+      "id": 1002,
+      "title": "Frontend Developer (React / TypeScript)",
+      "location": "Kyiv",
+      "snippet": "React and TypeScript product development. Work format to be discussed.",
+      "salary": "",
+      "source": "jooble",
+      "type": "Full-time",
+      "link": "https://ua.jooble.org/jdp/-222222",
+      "company": "Example Two",
+      "updated": "2099-09-21T07:00:00Z"
+    },
+    {
+      "id": 1003,
+      "title": "Angular Developer",
+      "location": "Kyiv · Hybrid",
+      "snippet": "Angular and TypeScript. Hybrid work format, two office days optional.",
+      "salary": "",
+      "source": "jooble",
+      "type": "Full-time",
+      "link": "https://ua.jooble.org/jdp/333333",
+      "company": "Example Three",
+      "updated": "2099-09-21T06:00:00Z"
+    },
+    {
+      "id": 1004,
+      "title": "Senior Java Engineer with React",
+      "location": "Remote",
+      "snippet": "Primary Java backend role with React UI work.",
+      "salary": "",
+      "source": "jooble",
+      "type": "Full-time",
+      "link": "https://ua.jooble.org/jdp/444444",
+      "company": "Example Four",
+      "updated": "2099-09-21T05:00:00Z"
+    },
+    {
+      "id": 1005,
+      "title": "React Developer",
+      "location": "Kyiv Office",
+      "snippet": "React TypeScript. Office-only position in Kyiv.",
+      "salary": "",
+      "source": "jooble",
+      "type": "Full-time",
+      "link": "https://ua.jooble.org/jdp/555555",
+      "company": "Example Five",
+      "updated": "2099-09-21T04:00:00Z"
+    },
+    {
+      "id": 1006,
+      "title": "AI Engineer (TypeScript)",
+      "location": "",
+      "snippet": "LLM tooling, TypeScript and Node.js. Remote-friendly team.",
+      "salary": "",
+      "source": "jooble",
+      "type": "Full-time",
+      "link": "https://ua.jooble.org/jdp/666666",
+      "company": "Example Six",
+      "updated": ""
+    }
+  ]
+}
