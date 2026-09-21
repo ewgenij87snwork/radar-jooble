@@ -50,7 +50,32 @@ def main() -> None:
         check(any(r.get("work_mode") == "HYBRID" for r in rows), "hybrid lane missing")
         check(any(r.get("work_mode") == "UNKNOWN" and r.get("decision") == "REVIEW" for r in rows), "unknown work mode was dropped")
 
-    check(not (ROOT / ".env.local").exists(), ".env.local must never be tracked/distributed")
+    # A local .env.local is required for normal authenticated use. Its presence is
+    # not a distribution failure; the invariant is that Git ignores and does not
+    # track it. Never read or print the file contents here.
+    gitignore_lines = {
+        line.strip()
+        for line in (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    check(".env.local" in gitignore_lines, ".env.local must be ignored by git")
+
+    git = shutil.which("git")
+    if git and (ROOT / ".git").exists():
+        ignored = subprocess.run(
+            [git, "-C", str(ROOT), "check-ignore", "-q", "--", ".env.local"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        check(ignored.returncode == 0, ".env.local is not ignored by git")
+
+        tracked = subprocess.run(
+            [git, "-C", str(ROOT), "ls-files", "--error-unmatch", "--", ".env.local"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        check(tracked.returncode != 0, ".env.local must never be tracked")
+
     print("SELFTEST PASS")
 
 if __name__ == "__main__":

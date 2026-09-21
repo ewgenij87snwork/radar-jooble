@@ -9,5 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Offline verification
-        run: python3 selftest.py
+      - name: Offline verification with local secret file present
+        run: |
+          printf '%s\n' 'JOOBLE_API_KEY=ci-dummy-not-a-real-key' > .env.local
+          chmod 600 .env.local
+          python3 selftest.py
