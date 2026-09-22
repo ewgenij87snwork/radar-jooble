@@ -6,7 +6,7 @@
 
 ## Default normal path: Jooble REST API
 
-Обычный owner-запуск: `./RUN.command` или двойной клик по `RUN.command`. Launcher сам синхронизирует `main`, делает полный snapshot за `24h`, пишет результаты, затем коммитит и пушит только `state/api-seen.jsonl` + `state/api-usage.json`.
+Обычный owner-запуск: `./RUN.command` или двойной клик по `RUN.command`. Launcher сам синхронизирует `main`, делает полный snapshot за `24h`, пишет результаты, затем коммитит и пушит текущую result-пару (`*.md` + `*.jsonl`) вместе с `state/api-seen.jsonl` + `state/api-usage.json`. `results/test/` не архивируется.
 
 Для агента/автоматизации низкоуровневый эквивалент поиска без git-sync: `python3 api-runner.py run --freshness 24h --force`.
 
