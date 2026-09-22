@@ -16,10 +16,10 @@ Work only from the physical `radar-jooble` folder. Read `AGENTS.md` first.
 3. запускает полный свежий Jooble API snapshot за последние `24h`;
 4. создаёт ровно два пользовательских файла в `results/`: один `*.md` и один `*.jsonl`;
 5. обновляет `state/api-seen.jsonl` и `state/api-usage.json`;
-6. коммитит только эти runtime-state файлы, подтягивает свежий `main` и пушит их в GitHub;
+6. коммитит текущую пару результата (`*.md` + `*.jsonl`) и эти два runtime-state файла, подтягивает свежий `main` и пушит всё это в GitHub;
 7. открывает папку `results/`.
 
-`.env.local`, результаты, watermark, lock и diagnostics в Git не пушатся.
+`.env.local`, watermark, lock, diagnostics и `results/test/` в Git не пушатся. Каждая обычная result-пара архивируется в Git history.
 
 На первом запуске после старой версии допустим один bootstrap:
 
