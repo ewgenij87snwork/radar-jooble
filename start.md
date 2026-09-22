@@ -2,33 +2,46 @@
 
 Work only from the physical `radar-jooble` folder. Read `AGENTS.md` first.
 
-## Normal run — default
+## Обычный запуск владельца
 
-Browser is not required. Pull the accepted GitHub version, keep the local `.env.local`, and run:
-
-```bash
-git pull --ff-only origin main
-chmod 600 .env.local
-python3 api-runner.py run
-```
-
-Use `--force` only when an immediate refresh is intentionally required; it consumes Jooble lifetime API quota:
+Одна команда:
 
 ```bash
-python3 api-runner.py run --force
+./RUN.command
 ```
 
-The runner prints a JSON summary and creates exactly two user-facing files in `results/`. Контракт: **ровно два** пользовательских файла:
-- one `*.md`;
-- one `*.jsonl`.
+`RUN.command` сам:
+1. переключается на `main` и делает `git pull --rebase --autostash origin main`;
+2. при обновлении launcher немедленно перезапускает уже новую версию;
+3. запускает полный свежий Jooble API snapshot за последние `24h`;
+4. создаёт ровно два пользовательских файла в `results/`: один `*.md` и один `*.jsonl`;
+5. обновляет `state/api-seen.jsonl` и `state/api-usage.json`;
+6. коммитит только эти runtime-state файлы, подтягивает свежий `main` и пушит их в GitHub;
+7. открывает папку `results/`.
 
-Internal diagnostics remain in `state/api-runs/` and are not part of normal user output.
+`.env.local`, результаты, watermark, lock и diagnostics в Git не пушатся.
 
-Transport status `DONE` means every configured API request returned a valid response. If `totalCount` exceeds page-1 results, `coverage_mode=BOUNDED_PAGE1`: usable quota-aware discovery, not exhaustive coverage.
+На первом запуске после старой версии допустим один bootstrap:
 
-Explicit Remote and Hybrid remain eligible. Explicit Office-only is rejected. Unknown work mode stays `REVIEW` instead of being dropped.
+```bash
+git pull --ff-only origin main && ./RUN.command
+```
 
-A repeated normal run inside the guard interval may reuse the previous two files without spending API quota.
+После этого всегда достаточно только `./RUN.command`.
+
+## Низкоуровневый эквивалент поиска
+
+Для отладки без git-sync:
+
+```bash
+python3 api-runner.py run --freshness 24h --force
+```
+
+`--force` означает **полный свежий snapshot** текущего freshness-window: already-seen вакансии не скрываются, но history всё равно обновляется. Каждый такой запуск расходует Jooble API quota.
+
+Transport status `DONE` означает, что все configured API requests получили валидный response. Если `totalCount` больше page-1 results, `coverage_mode=BOUNDED_PAGE1`: это quota-aware discovery, не exhaustive coverage.
+
+Freshness `24h` основан на Jooble API `updated`, а не на publication date. Имя result-файла показывает фактическое окно freshness, а не длительность выполнения.
 
 ## Offline verification
 
