@@ -13,7 +13,7 @@ JOOBLE_API_KEY=...
 Then use one command:
 
 ```bash
-./RUN.command
+./run.command
 ```
 
 The launcher pulls the current `main`, runs a **full 24h snapshot**, writes exactly one Markdown plus one JSONL under `results/`, updates runtime history, then commits the current result pair plus `state/api-seen.jsonl` + `state/api-usage.json` and pushes them back to GitHub.

@@ -7,10 +7,10 @@ Work only from the physical `radar-jooble` folder. Read `AGENTS.md` first.
 Одна команда:
 
 ```bash
-./RUN.command
+./run.command
 ```
 
-`RUN.command` сам:
+`run.command` сам:
 1. переключается на `main` и делает `git pull --rebase --autostash origin main`;
 2. при обновлении launcher немедленно перезапускает уже новую версию;
 3. запускает полный свежий Jooble API snapshot за последние `24h`;
@@ -24,10 +24,10 @@ Work only from the physical `radar-jooble` folder. Read `AGENTS.md` first.
 На первом запуске после старой версии допустим один bootstrap:
 
 ```bash
-git pull --ff-only origin main && ./RUN.command
+git pull --ff-only origin main && ./run.command
 ```
 
-После этого всегда достаточно только `./RUN.command`.
+После этого всегда достаточно только `./run.command`.
 
 ## Низкоуровневый эквивалент поиска
 

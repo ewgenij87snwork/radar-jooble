@@ -21,7 +21,7 @@ git pull --rebase --autostash origin main || { printf 'ОШИБКА: git pull н
 AFTER_PULL="$(git rev-parse HEAD 2>/dev/null || true)"
 
 if [ "$BEFORE_PULL" != "$AFTER_PULL" ] && [ "${RADAR_REEXECED:-0}" != "1" ]; then
-  exec env RADAR_REEXECED=1 "$ROOT/RUN.command" "$@"
+  exec env RADAR_REEXECED=1 "$ROOT/run.command" "$@"
 fi
 
 if [ ! -f ".env.local" ]; then
