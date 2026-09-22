@@ -473,6 +473,12 @@ def seen_item_unchanged(item: dict[str, Any], previous: dict[str, Any] | None) -
     return previous.get("updated_at") == item.get("updated_at") and previous.get("decision") == item.get("decision")
 
 
+def should_suppress_seen(args: argparse.Namespace, fixture: Path | None) -> bool:
+    # --force is an explicit fresh snapshot request: spend quota, re-fetch, and
+    # show the whole current freshness window even when jobs were seen before.
+    return not (args.test_live or fixture is not None or args.force)
+
+
 def persist_seen(items: list[dict[str, Any]], run_id: str) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     previous = read_seen()
@@ -516,9 +522,10 @@ def choose_freshness(explicit: str | None, *, test_live: bool) -> tuple[str, boo
     return "7d", True
 
 
-def result_stem(started: datetime, finished: datetime, *, test_live: bool) -> str:
-    left = started.astimezone(radar.KYIV).strftime("%d.%m.%Y %H.%M")
-    right = finished.astimezone(radar.KYIV).strftime("%d.%m.%Y %H.%M")
+def result_stem(started: datetime, cutoff: datetime, *, test_live: bool) -> str:
+    # The filename describes the actual freshness window, not run duration.
+    left = cutoff.astimezone(radar.KYIV).strftime("%d.%m.%Y %H.%M")
+    right = started.astimezone(radar.KYIV).strftime("%d.%m.%Y %H.%M")
     launch = started.astimezone(radar.KYIV).strftime("%d.%m.%Y %H.%M.%S")
     prefix = "Тест API вакансій" if test_live else "Вакансії"
     return f"{prefix} {left} — {right} · запуск {launch}"
@@ -546,7 +553,7 @@ def write_results(*, started: datetime, finished: datetime, freshness_key: str, 
                   visible_items: list[dict[str, Any]], suppressed_seen: int,
                   stopped_reason: str) -> tuple[Path, Path, Path]:
     directory = TEST_RESULTS_DIR if test_live else RESULTS_DIR
-    md_path, jsonl_path, diag_path = unique_paths(directory, result_stem(started, finished, test_live=test_live))
+    md_path, jsonl_path, diag_path = unique_paths(directory, result_stem(started, cutoff, test_live=test_live))
     output_items = [item for item in visible_items if item["decision"] in {"MATCH", "REVIEW"}]
     with jsonl_path.open("w", encoding="utf-8") as handle:
         for item in output_items:
@@ -713,8 +720,9 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             recent_jobs.append((job, False))
     classified_all = [classify_api_job(job, freshness_unknown=unknown) for job, unknown in recent_jobs]
     classified_all.sort(key=lambda i: (i["decision"] != "MATCH", i["decision"] != "REVIEW", i["title"].casefold(), i["identity"]))
-    seen = {} if args.test_live or fixture else read_seen()
-    visible_items = classified_all if args.test_live or fixture else [i for i in classified_all if not seen_item_unchanged(i, seen.get(i["identity"]))]
+    suppress_seen = should_suppress_seen(args, fixture)
+    seen = read_seen() if suppress_seen else {}
+    visible_items = [i for i in classified_all if not seen_item_unchanged(i, seen.get(i["identity"]))] if suppress_seen else classified_all
     suppressed_seen = len(classified_all) - len(visible_items)
 
     if not responses:
@@ -773,7 +781,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--test-live", action="store_true", help="isolated output; does not update API seen/watermark")
     parser.add_argument("--freshness", choices=tuple(FRESHNESS), default=None)
     parser.add_argument("--max-requests", type=int, default=None)
-    parser.add_argument("--force", action="store_true", help="bypass recent-result reuse; consumes quota")
+    parser.add_argument("--force", action="store_true", help="fresh full snapshot: bypass reuse and seen suppression; consumes quota")
     parser.add_argument("--fixture", default=None, help=argparse.SUPPRESS)
     return parser
 

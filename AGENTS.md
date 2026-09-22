@@ -6,9 +6,11 @@
 
 ## Default normal path: Jooble REST API
 
-Обычный owner-запуск: двойной клик по `RUN.command`. Для агента/автоматизации эквивалент: `python3 api-runner.py run`.
+Обычный owner-запуск: `./RUN.command` или двойной клик по `RUN.command`. Launcher сам синхронизирует `main`, делает полный snapshot за `24h`, пишет результаты, затем коммитит и пушит текущую result-пару (`*.md` + `*.jsonl`) вместе с `state/api-seen.jsonl` + `state/api-usage.json`. `results/test/` не архивируется.
 
-Normal run пишет **ровно два пользовательских результата** в `results/`: один Markdown + один JSONL. Internal diagnostics/state остаются под `state/` и не являются пользовательским output.
+Для агента/автоматизации низкоуровневый эквивалент поиска без git-sync: `python3 api-runner.py run --freshness 24h --force`.
+
+Normal run пишет **ровно два пользовательских результата** в `results/`: один Markdown + один JSONL. Internal diagnostics/watermark/lock остаются локально. `state/api-seen.jsonl` и `state/api-usage.json` — намеренно git-synced runtime state; они не содержат API key.
 
 Secret boundary:
 - `.env.local` содержит только локальный `JOOBLE_API_KEY=...`;
@@ -29,7 +31,7 @@ API normal semantics:
 - unknown/invalid `updated` не теряется: `REVIEW` с freshness caution;
 - main JSONL содержит только MATCH/REVIEW; REJECT хранится только во внутреннем state/diagnostics.
 
-Повторный normal run раньше guard-интервала может вернуть предыдущие два готовых файла без новых API calls. `--force` — только явный override и расходует quota.
+Повторный низкоуровневый normal run без `--force` раньше guard-интервала может вернуть предыдущие два готовых файла без новых API calls. `--force` расходует quota и означает полный свежий snapshot: already-seen вакансии не скрываются, но seen-history обновляется. Owner launcher всегда использует `24h --force`.
 
 ## Preserved browser path
 

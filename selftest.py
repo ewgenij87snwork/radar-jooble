@@ -18,6 +18,9 @@ def main() -> None:
     if node:
         for rel in ("browser-runner.mjs", "sources/jooble-adapter.mjs"):
             subprocess.run([node, "--check", str(ROOT / rel)], check=True, stdout=subprocess.DEVNULL)
+    bash = shutil.which("bash")
+    if bash:
+        subprocess.run([bash, "-n", str(ROOT / "RUN.command")], check=True, stdout=subprocess.DEVNULL)
 
     expected = {
         "radar.py": "f3b61c16ec0cece2381931040d660838729e120829d44745b262a48ccb07e6a0",
@@ -29,6 +32,11 @@ def main() -> None:
 
     spec = importlib.util.spec_from_file_location("radar_api_selftest", ROOT / "api-runner.py")
     mod = importlib.util.module_from_spec(spec); sys.modules[spec.name] = mod; spec.loader.exec_module(mod)
+    normal_args = mod.build_parser().parse_args(["run"])
+    force_args = mod.build_parser().parse_args(["run", "--force"])
+    check(mod.should_suppress_seen(normal_args, None), "normal run must suppress unchanged seen jobs")
+    check(not mod.should_suppress_seen(force_args, None), "--force must return a full current snapshot")
+
     with tempfile.TemporaryDirectory(prefix="radar-jooble-selftest-") as td:
         base = Path(td)
         mod.RESULTS_DIR = base / "results"
@@ -59,6 +67,11 @@ def main() -> None:
         if line.strip() and not line.lstrip().startswith("#")
     }
     check(".env.local" in gitignore_lines, ".env.local must be ignored by git")
+    check("state/api-seen.jsonl" not in gitignore_lines, "api-seen history must be git-syncable")
+    check("state/api-usage.json" not in gitignore_lines, "api quota state must be git-syncable")
+    launcher = (ROOT / "RUN.command").read_text(encoding="utf-8")
+    check("api-runner.py run --freshness 24h --force" in launcher, "launcher must run a forced 24h snapshot")
+    check("git add -f -- \"$item\"" in launcher, "launcher must archive the current result pair")
 
     git = shutil.which("git")
     if git and (ROOT / ".git").exists():
