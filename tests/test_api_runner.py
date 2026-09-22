@@ -1,7 +1,7 @@
 import importlib.util
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -126,6 +126,22 @@ def test_seen_same_version_is_suppressed_but_update_resurfaces():
     assert api.seen_item_unchanged(item, previous)
     previous["updated_at"] = "2026-09-20T08:00:00Z"
     assert not api.seen_item_unchanged(item, previous)
+
+
+def test_force_is_full_snapshot_not_seen_suppression():
+    normal = api.build_parser().parse_args(["run"])
+    forced = api.build_parser().parse_args(["run", "--force"])
+    assert api.should_suppress_seen(normal, None)
+    assert not api.should_suppress_seen(forced, None)
+
+
+def test_result_filename_describes_freshness_window_not_run_duration():
+    started = datetime(2026, 9, 22, 9, 4, 50, tzinfo=timezone.utc)
+    cutoff = started - timedelta(days=1)
+    stem = api.result_stem(started, cutoff, test_live=False)
+    left = cutoff.astimezone(api.radar.KYIV).strftime("%d.%m.%Y %H.%M")
+    right = started.astimezone(api.radar.KYIV).strftime("%d.%m.%Y %H.%M")
+    assert f"{left} — {right}" in stem
 
 
 def test_end_to_end_fixture_writes_only_match_review_to_jsonl(monkeypatch, tmp_path):
