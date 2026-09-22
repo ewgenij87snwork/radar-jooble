@@ -20,7 +20,7 @@ def main() -> None:
             subprocess.run([node, "--check", str(ROOT / rel)], check=True, stdout=subprocess.DEVNULL)
     bash = shutil.which("bash")
     if bash:
-        subprocess.run([bash, "-n", str(ROOT / "RUN.command")], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run([bash, "-n", str(ROOT / "run.command")], check=True, stdout=subprocess.DEVNULL)
 
     expected = {
         "radar.py": "f3b61c16ec0cece2381931040d660838729e120829d44745b262a48ccb07e6a0",
@@ -69,7 +69,7 @@ def main() -> None:
     check(".env.local" in gitignore_lines, ".env.local must be ignored by git")
     check("state/api-seen.jsonl" not in gitignore_lines, "api-seen history must be git-syncable")
     check("state/api-usage.json" not in gitignore_lines, "api quota state must be git-syncable")
-    launcher = (ROOT / "RUN.command").read_text(encoding="utf-8")
+    launcher = (ROOT / "run.command").read_text(encoding="utf-8")
     check("api-runner.py run --freshness 24h --force" in launcher, "launcher must run a forced 24h snapshot")
     check("git add -f -- \"$item\"" in launcher, "launcher must archive the current result pair")
 

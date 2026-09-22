@@ -13,5 +13,6 @@ jobs:
         run: |
           printf '%s\n' 'JOOBLE_API_KEY=ci-dummy-not-a-real-key' > .env.local
           chmod 600 .env.local
-          bash -n RUN.command
+          bash -n run.command
+          test -x run.command
           python3 selftest.py
