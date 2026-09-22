@@ -31,15 +31,32 @@ fi
 chmod 600 .env.local || { printf 'ОШИБКА: не удалось защитить .env.local\n'; exit 2; }
 
 SUMMARY="$(mktemp -t radar-jooble-summary.XXXXXX)"
-trap 'rm -f "$SUMMARY"' EXIT
+OUTPUT_LIST="$(mktemp -t radar-jooble-outputs.XXXXXX)"
+trap 'rm -f "$SUMMARY" "$OUTPUT_LIST"' EXIT
 
 python3 api-runner.py run --freshness 24h --force >"$SUMMARY"
 RUN_RC=$?
 cat "$SUMMARY"
 printf '\n'
 
+python3 - "$SUMMARY" >"$OUTPUT_LIST" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+try:
+    payload = json.loads(path.read_text(encoding="utf-8").strip().splitlines()[-1])
+except Exception:
+    raise SystemExit(0)
+for key in ("markdown", "jsonl"):
+    value = payload.get(key)
+    if value:
+        print(value)
+PY
+
 SYNC_RC=0
 git add -- state/api-seen.jsonl state/api-usage.json 2>/dev/null || true
+while IFS= read -r item; do
+  [ -n "$item" ] && git add -f -- "$item"
+done <"$OUTPUT_LIST"
 if ! git diff --cached --quiet --exit-code; then
   STAMP="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   git -c user.name='Yevgeniy Sorokin' \
