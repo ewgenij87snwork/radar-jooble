@@ -16,9 +16,9 @@ Then use one command:
 ./RUN.command
 ```
 
-The launcher pulls the current `main`, runs a **full 24h snapshot**, writes exactly one Markdown plus one JSONL under `results/`, updates runtime history, commits `state/api-seen.jsonl` + `state/api-usage.json`, and pushes that state back to GitHub.
+The launcher pulls the current `main`, runs a **full 24h snapshot**, writes exactly one Markdown plus one JSONL under `results/`, updates runtime history, then commits the current result pair plus `state/api-seen.jsonl` + `state/api-usage.json` and pushes them back to GitHub.
 
-`.env.local`, `results/`, watermark, diagnostics and lock files stay local. Because this repository is public, the intentionally synced `api-seen.jsonl` job-history state is also public.
+`.env.local`, watermark, diagnostics, locks and `results/test/` stay local. Because this repository is public, archived result pairs and the intentionally synced `api-seen.jsonl` job-history state are also public.
 
 - official Jooble REST API is the default discovery transport;
 - API `updated` is treated as freshness evidence, not publication date;
